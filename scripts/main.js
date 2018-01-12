@@ -20,51 +20,76 @@ let goAttack = null;
 let mark = 0;
 let moveAction = false; 
 
-//рисования прямугольника
-const fillRect = function(x, y, w, h) {
+//drawing rect
+function fillRect(x, y, w, h) {
 	context.fillRect(x, y, w, h);
-};
+}
 
-//рисования незакрашеного прямоугольника
-const strokeRect = function(x, y, w, h) {
-			context.strokeRect(x, y, w, h);
-		};
+//drawing empty rect
+function strokeRect(x, y, w, h) {
+	context.strokeRect(x, y, w, h);
+}
 
-
-//рисования главного меню игры
+//drawing main menu
 function drawMenu() {
 	inBlock = 'menu';
 
 	let img = new Image();
-	img.onload = function(){run()};
-
+	img.onload = function(){ run(); };
 	img.src='./img/clouds.png';
 
 	function run(){
 		context.drawImage(img ,0, 0);
 
+		//draw rect
 		context.strokeStyle = '#00007F';
 		context.fillStyle = '#4C8BFF';
 
+		//New game
     context.fillRect(250, 150, 300, 70);
     context.strokeRect(250, 150, 300, 70);
     
+    //Continue
     context.fillRect(250, 275, 300, 70);
     context.strokeRect(250, 275, 300, 70);
 
-    // context.fillRect(250, 400, 300, 70);
-    // context.strokeRect(250, 400, 300, 70);
+    //shop
+    context.fillRect(250, 400, 300, 70);
+    context.strokeRect(250, 400, 300, 70);
 
+    //draw text
     context.font = "50px Arial";
 		context.fillStyle = 'white';
 
 		context.fillText('New game', 280, 200);
 		context.fillText('Continue', 300, 327);
-		// context.fillText('Shop', 345, 453);	
+		context.fillText('Shop', 345, 453);	
   }
 }
 
-//получения координат позикии курсора в канве
+// output of the number of correct answers 
+function drawAnswerTrue() {
+	clearTimeout(setIntervalForGame);
+
+	let img = new Image();
+	img.onload = function(){ run(); };
+	img.src='./img/sky.png';
+
+	function run(){
+		context.drawImage(img ,0, 0);
+
+    context.font = "50px Arial";
+		context.fillStyle = 'white';
+
+		context.fillText('You answered correctly', 160, 227);
+		context.fillText(`on ${mark} examples of ${data.length}`, 200, 297);
+
+		context.font = "30px Arial";
+		context.fillText('Press ESC to enter the menu', 200, 597);
+  }
+}
+
+//getting coordinates mouse in canvas
 function getMousePos(e) {
   let rect = canvas.getBoundingClientRect();
   return {
@@ -73,9 +98,8 @@ function getMousePos(e) {
   };
 }
 
-//события клика мышки
+//event 'click'
 canvas.onclick = function(e) {
-
 	if (inBlock === 'menu') {
 	const mousePos = getMousePos(e);
 
@@ -84,40 +108,33 @@ canvas.onclick = function(e) {
 			if (mousePos.y > 150 && mousePos.y < 220) { //new game
 				inBlock = 'game';
 				startGame(0);
-				console.log('New game');
 			}
 	
 			if (mousePos.y > 275 && mousePos.y < 345) { //continue
 				inBlock = 'game';
 				startGame(1);
-				console.log('Continue');
 			}
 	
 			if (mousePos.y > 400 && mousePos.y < 470) { //shop
 				inBlock = 'shop';
-				console.log('Shop');
 			}
 		}
 	}
-
 };
 
-//события нажатия клавиш
+//event 'keydown'
 body.onkeydown = function(e) {
+	if (e.keyCode === 27 ) {
+		inBlock = 'menu';
+		drawMenu();
 
-	if (e.keyCode === 27 && inBlock !== 'game') {
-			inBlock = 'menu';
-			drawMenu();
+		//for game
+		clearTimeout(setIntervalForGame); 
+		save();
 	}
 
 	if (inBlock === 'game' && !moveAction) {
 		switch (e.keyCode) { 
-			case 27: { //Esc
-					inBlock = 'menu';
-					clearTimeout(setIntervalForGame);
-					drawMenu();
-					save();
-			}; break;
 			case 13: { //enter
 				if (answer !== '') { checkAnswer(); }
 			}; break;
@@ -127,80 +144,98 @@ body.onkeydown = function(e) {
 			case 48: { //0
 				addNumberToAns(0);
 			}; break;
-			case 49: { //1
+			case 97: //1
+			case 49: { 
 				addNumberToAns(1);
 			}; break;
-			case 50: { //2
+			case 98: //2
+			case 50: {
 				addNumberToAns(2);
 			}; break;
-			case 51: { //3
+			case 99: //3
+			case 51: { 
 				addNumberToAns(3);
 			}; break;
-			case 52: { //4
+			case 100: //4
+			case 52: {
 				addNumberToAns(4);
 			}; break;
-			case 53: { //5
+			case 101: //5
+			case 53: {
 				addNumberToAns(5);
 			}; break;
-			case 54: { //6
+			case 102: //6
+			case 54: {
 				addNumberToAns(6);
 			}; break;
-			case 55: { //7
+			case 103: //7
+			case 55: {
 				addNumberToAns(7);
 			}; break;
-			case 56: { //8
+			case 104: //8
+			case 56: {
 				addNumberToAns(8);
 			}; break;
-			case 57: { //9
+			case 105: //9
+			case 57: {
 				addNumberToAns(9);
+			}; break;
+			case 108: //point
+			case 188: 
+			case 190: 
+			case 191: {
+				addNumberToAns('.');
 			}; break;
 		}
 	}
-}
+};
 
-//добавления числа в строку ответа
+//adding answer in answer string
 function addNumberToAns(num) {
-	if (answer.length > 5) {return;}
+	if (answer.length > 9) {return;}
 	answer += num;
 }
 
-//проверка правильности ответа
+//check if the answer is true
 function checkAnswer() {
 	trueAnswer = eval(question) === eval(answer);
 	goAttack = 1;
 }
 
-//функция инициализации старта игры
+//initializations function
 function startGame(bool) { // 1 - continue, 0 - new game
 	inBlock = 'game';
 	answer = '';	
 
 	setIntervalForGame = setInterval(function() {	drawGame(); }, 90);
 	
-	if (bool) { //continue
-		if (localStorage['i'] && localStorage['i'] < data.length) {
+	if (bool) {
+		if (localStorage['i'] && localStorage['i'] < data.length) { //continue
 			dataIter = localStorage['i'];
+			mark = parseInt(localStorage['mark']);
 		} else {
 			dataIter = 0;
+			mark = 0;
 		}
-	} else {
+	} else { //new game
 		dataIter = 0;
+		mark = 0;
 	}
 
 	drawGame();
 }
 
-//функция прорисовки игровых обектов
+//function of drawing of game objects
 function drawGame() {
-	if (dataIter === data.length) {
+	if (dataIter === data.length) { //if questions ended
 		drawAnswerTrue();
 		return;
 	}
 
-
 	question = data[dataIter];
+
 	let bgi = new Image();
-	bgi.onload = function(){run()};
+	bgi.onload = function(){ run(); };
 	bgi.src='./img/BG1.png';
 
 	function run(){
@@ -221,7 +256,7 @@ function drawGame() {
   }
 }
 
-//функция прорисовки блока где будет вопрос и ответ
+//the function of drawing a block where will be the question and answer
 function drawBlockQuestion() {
 	context.strokeStyle = 'rgba(42, 252, 255, 0.78)';
 	context.fillStyle = 'rgba(255, 255, 255, .58)';
@@ -230,7 +265,7 @@ function drawBlockQuestion() {
   context.strokeRect(220, 50, 400, 70);
 }
 
-//функция прорисовка текста какой будет выводится и какой будут вводить
+//the function of drawing a text which will be displayed and which will be entered
 function writeTextInBlock() {
 	context.font = "24px Arial";
 	context.fillStyle = '#3FBDBD';
@@ -238,7 +273,7 @@ function writeTextInBlock() {
 	context.fillText(`${question} = ${answer}` , 250, 95);
 }
 
-//функция для загрузки картинок какие будут отображатся как герой и враг
+//a function for downloading images that will be displayed as a hero and an enemy
 function loadImage(path, width, height, count) {
 	const img = document.createElement('img');
 	const result = {
@@ -249,14 +284,16 @@ function loadImage(path, width, height, count) {
 		loaded: false,
 		num: 0
 	};
+
 	img.onload = function() {
 		result.loaded = true;	
 	};
+
 	img.src = path;
 	return result;
 }
 
-//функция рисования героя и врага
+//the function of drawing the hero and the enemy
 /*
 	type
 	1 - stop
@@ -264,8 +301,9 @@ function loadImage(path, width, height, count) {
 	3 - atack
 	4 - back
 */
+
 function drawImage(img, x, y, type, person) {
-	if (!img.loaded) {return;}
+	if (!img.loaded) { return; }
 
 	if (person === 'hero') {
 		checkHeroType();
@@ -276,7 +314,7 @@ function drawImage(img, x, y, type, person) {
 	}
 
 	function checkHeroType() {
-		if (type === 1) {img.num = 6;}
+		if (type === 1) { img.num = 6; }
 		if (type === 2) {
 			if (img.num >= img.count - 1) {
 				img.num = 6;
@@ -284,7 +322,7 @@ function drawImage(img, x, y, type, person) {
 				img.num +=1;
 			}
 		}
-		if (type === 3) {img.num = 10; }
+		if (type === 3) { img.num = 10; }
 		if (type === 4) {
 			if (img.num >= img.count - 6) {
 				img.num = 1;
@@ -295,7 +333,7 @@ function drawImage(img, x, y, type, person) {
 	}
 
 	function checkEnemyType() {
-		if (type === 1) {img.num = 3;}
+		if (type === 1) { img.num = 3; }
 		if (type === 2) {
 			if (img.num >= img.count - 1) {
 				img.num = 2;
@@ -303,7 +341,7 @@ function drawImage(img, x, y, type, person) {
 				img.num +=1;
 			}
 		}
-		if (type === 3) {img.num = 1;}
+		if (type === 3) { img.num = 1; }
 		if (type === 4) {
 			if (img.num >= img.count + 1) {
 				img.num = 4;
@@ -407,19 +445,19 @@ function nextQuestion() {
 	answer = '';
 }
 
+function save() {
+	localStorage['i'] = dataIter;
+	localStorage['mark'] = mark;
+}
 
-//создания героя и врага
+//creating a hero and an enemy
 const hero = loadImage('./img/heroes/1.png', 37, 48, 10);
 const enemy = loadImage('./img/enemies/1.png', 48, 60, 4);
 
-function save() {
-	localStorage['i'] = dataIter;
-}
-
-//добавления музыки
+//adding music
 function loadAudio(arr, vol) {
-	//create new element audio
-	var audio = document.createElement('audio');
+	const audio = document.createElement('audio');
+
 	for (var i = 0; i < arr.length; i++) {
 		var source = document.createElement('source');
 		source.src = arr[i];
@@ -429,20 +467,11 @@ function loadAudio(arr, vol) {
 	audio.volume = vol || 1; //set volume
 
 	var obj = {
-		dom: false,
+		dom: null,
 		state: 'stop',
 		play: function() {
 			this.dom.play();
 			this.state = 'play';
-		},
-		replay: function() {
-			this.dom.currentTime = 0;
-			this.dom.play();
-			this.state = 'replay';
-		},
-		pause: function() {
-			this.dom.pause();
-			this.state = 'pause';
 		},
 		stop: function() {
 			this.dom.pause();
@@ -456,80 +485,12 @@ function loadAudio(arr, vol) {
 }
 
 const music = loadAudio(['./music/bit.mp3'], 0.3);
-music.play();
+// music.play();
 
 music.dom.addEventListener('ended', function() {
-    this.currentTime = 0;
-    this.play();
+	this.currentTime = 0;
+	this.play();
 }, false);
-
-
-function drawAnswerTrue() {
-	clearTimeout(setIntervalForGame);
-
-	let img = new Image();
-	img.onload = function(){run()};
-
-	img.src='./img/sky.png';
-
-	function run(){
-		context.drawImage(img ,0, 0);
-
-    context.font = "50px Arial";
-		context.fillStyle = 'white';
-
-		context.fillText('You answered correctly', 160, 227);
-		context.fillText(`on ${mark} examples of ${data.length}`, 200, 297);
-
-		context.font = "30px Arial";
-		context.fillText('Press ESC to enter the menu', 200, 597);
-  }
-}
 
 //Вызов функций (финальный этап)
 drawMenu();
-
-/*
-//fullscreen
-
-
-
-	function fullScreen(element) {
-			if (element.requestFullScreen) {
-				element.requestFullScreen();
-			} else if (element.mozRequestFullScreen) {
-				element.mozRequestFullScreen();
-			} else if (element.webkitRequestFullScreen) {
-				element.webkitRequestFullScreen();
-			}
-		}
-
-		function cancelFullScreen() {
-			if (document.cancelFullScreen) {
-				document.cancelFullScreen();
-			} else if (document.mozCancelFullScreen) {
-				document.mozCancelFullScreen();
-			} else if (document.webkitCancelFullScreen) {
-				document.webkitCancelFullScreen();
-			}
-		}
-
-
-		var onfullscreencange = function() {
-			var fullscreenElement = document.fullscreenElement || document.mozFullscreenElement || document.webkitFullscreenElement;
-
-			var fullscreenEnabled = document.fullscreenEnabled || document.mozFullscreenEnebled || document.webkitFullscreenEnabled;
-
-			console.log('fullscreenEnabled = ', fullscreenEnabled, 'fullscreenElement = ', fullscreenElement);
-		};
-
-
-
-
-
-
-		document.querySelector('canvas').onclick = function() {
-			fullScreen(document.querySelector('canvas'))
-			onfullscreencange();			
-		};
-*/

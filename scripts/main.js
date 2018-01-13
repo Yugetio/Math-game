@@ -22,84 +22,6 @@ let goAttack = null;
 let mark = 0;
 let moveAction = false; 
 
-//drawing rect
-function fillRect(x, y, w, h) {
-	context.fillRect(x, y, w, h);
-}
-
-//drawing empty rect
-function strokeRect(x, y, w, h) {
-	context.strokeRect(x, y, w, h);
-}
-
-//drawing main menu
-function drawMenu() {
-	inBlock = 'menu';
-
-	let img = new Image();
-	img.onload = function(){ run(); };
-	img.src='./img/clouds.png';
-
-	function run(){
-		context.drawImage(img ,0, 0);
-
-		//draw rect
-		context.strokeStyle = '#00007F';
-		context.fillStyle = '#4C8BFF';
-
-		//New game
-    context.fillRect(250, 150, 300, 70);
-    context.strokeRect(250, 150, 300, 70);
-    
-    //Continue
-    context.fillRect(250, 275, 300, 70);
-    context.strokeRect(250, 275, 300, 70);
-
-    //shop
-    context.fillRect(250, 400, 300, 70);
-    context.strokeRect(250, 400, 300, 70);
-
-    //draw text
-    context.font = "50px Arial";
-		context.fillStyle = 'white';
-
-		context.fillText('New game', 280, 200);
-		context.fillText('Continue', 300, 327);
-		context.fillText('Shop', 345, 453);	
-  }
-}
-
-// output of the number of correct answers 
-function drawAnswerTrue() {
-	clearTimeout(setIntervalForGame);
-
-	let img = new Image();
-	img.onload = function(){ run(); };
-	img.src='./img/sky.png';
-
-	function run(){
-		context.drawImage(img ,0, 0);
-
-    context.font = "50px Arial";
-		context.fillStyle = 'white';
-
-		context.fillText('You answered correctly', 160, 227);
-		context.fillText(`on ${mark} examples of ${data.length}`, 200, 297);
-
-		context.font = "30px Arial";
-		context.fillText('Press ESC to enter the menu', 200, 597);
-  }
-}
-
-//getting coordinates mouse in canvas
-function getMousePos(e) {
-  let rect = canvas.getBoundingClientRect();
-  return {
-    x: e.clientX - rect.left,
-    y: e.clientY - rect.top
-  };
-}
-
 //event 'click'
 canvas.onclick = function(e) {
 	if (inBlock === 'menu') {
@@ -120,6 +42,14 @@ canvas.onclick = function(e) {
 			if (mousePos.y > 400 && mousePos.y < 470) { //shop
 				inBlock = 'shop';
 			}
+		}
+
+		if (mousePos.x > 0 && mousePos.x < 68 && mousePos.y > 486 && mousePos.y < 557) { //music
+				if (music.state === 'stop') {
+					music.play();
+				} else {
+					music.stop();
+				}
 		}
 	}
 };
@@ -192,6 +122,177 @@ body.onkeydown = function(e) {
 	}
 };
 
+//getting coordinates mouse in canvas
+function getMousePos(e) {
+  let rect = canvas.getBoundingClientRect();
+  return {
+    x: e.clientX - rect.left,
+    y: e.clientY - rect.top
+  };
+}
+
+//drawing rect
+function fillRect(x, y, w, h) {
+	context.fillRect(x, y, w, h);
+}
+
+//drawing empty rect
+function strokeRect(x, y, w, h) {
+	context.strokeRect(x, y, w, h);
+}
+
+//drawing main menu
+function drawMenu() {
+	inBlock = 'menu';
+
+	let img = new Image();
+	img.onload = function(){ run(); };
+	img.src='./img/clouds1.png';
+
+	function run(){
+		context.drawImage(img ,0, 0);
+
+		//draw rect
+		context.strokeStyle = '#00007F';
+		context.fillStyle = '#4C8BFF';
+
+		//New game
+    context.fillRect(250, 150, 300, 70);
+    context.strokeRect(250, 150, 300, 70);
+    
+    //Continue
+    context.fillRect(250, 275, 300, 70);
+    context.strokeRect(250, 275, 300, 70);
+
+    //shop
+    context.fillRect(250, 400, 300, 70);
+    context.strokeRect(250, 400, 300, 70);
+
+    //draw text
+    context.font = "50px Arial";
+		context.fillStyle = 'white';
+
+		context.fillText('New game', 280, 200);
+		context.fillText('Continue', 300, 327);
+		context.fillText('Shop', 345, 453);			
+  }
+}
+
+// output of the number of correct answers 
+function drawAnswerTrue() {
+	clearTimeout(setIntervalForGame);
+
+	let img = new Image();
+	img.onload = function(){ run(); };
+	img.src='./img/sky.png';
+
+	function run(){
+		context.drawImage(img ,0, 0);
+
+    context.font = "50px Arial";
+		context.fillStyle = 'white';
+
+		context.fillText('You answered correctly', 160, 227);
+		context.fillText(`on ${mark} examples of ${data.length}`, 200, 297);
+
+		context.font = "30px Arial";
+		context.fillText('Press ESC to enter the menu', 200, 597);
+  }
+}
+
+//function of drawing of game objects
+function drawGame() {
+	if (dataIter === data.length) { //if questions ended
+		drawAnswerTrue();
+		return;
+	}
+
+	question = data[dataIter];
+
+	let bgi = new Image();
+	bgi.onload = function(){ run(); };
+	bgi.src='./img/BG3.png';
+
+	function run(){
+		context.drawImage(bgi, 0, 0);
+
+		//question
+		drawBlockQuestion();
+    writeTextInBlock();
+
+    //massage
+    drawMessageBlock()
+
+		if (trueAnswer === true) { //attack hero
+			heroGoAttack();
+		} else if (trueAnswer === false) {
+			enemyGoAttack();
+		} else {
+			heroStop();	
+			enemyStop();
+		}
+  }
+}
+
+//the function of drawing a block where will be the question and answer
+function drawBlockQuestion() {
+	let border = 'rgba(42, 252, 255, 0.78)';
+
+	if (trueAnswer) { 
+		border = 'green';
+	} else if (trueAnswer === false) {
+		border = 'red';
+	}
+
+	context.strokeStyle = border;
+	context.fillStyle = 'rgba(255, 255, 255, .58)';
+
+  context.fillRect(220, 90, 400, 70);
+  context.strokeRect(220, 90, 400, 70);
+}
+
+//the function of drawing a text which will be displayed and which will be entered
+function writeTextInBlock() {
+	context.font = "24px Arial";
+	context.fillStyle = '#3FBDBD';
+
+	context.fillText(`${question} = ${answer}` , 250, 135);
+}
+
+function drawMessageBlock() {
+	context.strokeStyle = 'rgba(99, 57, 27, 1.0)';
+	context.fillStyle = 'rgba(175, 100, 46, .7)';
+
+  context.fillRect(220, 500, 400, 70);
+  context.strokeRect(220, 500, 400, 70);
+
+  enterTextFromMessage();
+}
+
+function enterTextFromMessage() {
+	let text = '';
+	let x = 240;
+
+	if (trueAnswer === null) {
+		text = 'Heroes are waiting for an answer';
+	} else if (trueAnswer) {
+		text = 'Your answer is correct';
+		x = 300;
+	} else {
+		text = 'Your answer is incorrect';
+		x = 300;
+	}
+
+	 drawMessageText(text, x);
+}
+
+function drawMessageText(text, x) {
+	context.font = "24px Arial";
+	context.fillStyle = '#EC9';
+
+	context.fillText(text , x, 545);
+}
+
 //adding answer in answer string
 function addNumberToAns(num) {
 	if (answer.length > 9) {return;}
@@ -225,54 +326,6 @@ function startGame(bool) { // 1 - continue, 0 - new game
 	}
 
 	drawGame();
-}
-
-//function of drawing of game objects
-function drawGame() {
-	if (dataIter === data.length) { //if questions ended
-		drawAnswerTrue();
-		return;
-	}
-
-	question = data[dataIter];
-
-	let bgi = new Image();
-	bgi.onload = function(){ run(); };
-	bgi.src='./img/BG3.png';
-
-	function run(){
-		context.drawImage(bgi, 0, 0);
-
-		//question
-		drawBlockQuestion();
-    writeTextInBlock();
-
-		if (trueAnswer === true) { //attack hero
-			heroGoAttack();
-		} else if (trueAnswer === false) {
-			enemyGoAttack();
-		} else {
-			heroStop();	
-			enemyStop();
-		}
-  }
-}
-
-//the function of drawing a block where will be the question and answer
-function drawBlockQuestion() {
-	context.strokeStyle = 'rgba(42, 252, 255, 0.78)';
-	context.fillStyle = 'rgba(255, 255, 255, .58)';
-
-  context.fillRect(220, 50, 400, 70);
-  context.strokeRect(220, 50, 400, 70);
-}
-
-//the function of drawing a text which will be displayed and which will be entered
-function writeTextInBlock() {
-	context.font = "24px Arial";
-	context.fillStyle = '#3FBDBD';
-
-	context.fillText(`${question} = ${answer}` , 250, 95);
 }
 
 //a function for downloading images that will be displayed as a hero and an enemy

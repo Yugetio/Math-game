@@ -12,8 +12,10 @@ let inBlock = 'menu';
 let question = '';
 let answer = '';
 let setIntervalForGame = null;
-let PosHeroX = 300;
-let PosEnemyX = 500;
+let PosHeroX = 200;
+const PosHeroY = 389;
+let PosEnemyX = 600;
+const PosEnemyY = 419;
 let trueAnswer = null;
 let dataIter = 0;
 let goAttack = null;
@@ -236,7 +238,7 @@ function drawGame() {
 
 	let bgi = new Image();
 	bgi.onload = function(){ run(); };
-	bgi.src='./img/BG1.png';
+	bgi.src='./img/BG3.png';
 
 	function run(){
 		context.drawImage(bgi, 0, 0);
@@ -305,89 +307,94 @@ function loadImage(path, width, height, count) {
 function drawImage(img, x, y, type, person) {
 	if (!img.loaded) { return; }
 
+	let mx = 45,
+			my = 0;
+
 	if (person === 'hero') {
-		checkHeroType();
+		checkHeroType(img, type);
+		my = 60;
 	} 
 
 	if (person === 'enemy') {
-		checkEnemyType();
+		checkEnemyType(img, type);
+		my = 30;
 	}
 
-	function checkHeroType() {
-		if (type === 1) { img.num = 6; }
-		if (type === 2) {
-			if (img.num >= img.count - 1) {
-				img.num = 6;
-			} else {
-				img.num +=1;
-			}
-		}
-		if (type === 3) { img.num = 10; }
-		if (type === 4) {
-			if (img.num >= img.count - 6) {
-				img.num = 1;
-			} else {
-				img.num +=1;
-			}
+	context.drawImage(img.dom, img.width*(img.num-1), 0, img.width, img.height, x, y, mx, my);	
+}
+
+function checkHeroType(img, type) {
+	if (type === 1) { img.num = 6; }
+	if (type === 2) {
+		if (img.num >= img.count - 1) {
+			img.num = 6;
+		} else {
+			img.num +=1;
 		}
 	}
-
-	function checkEnemyType() {
-		if (type === 1) { img.num = 3; }
-		if (type === 2) {
-			if (img.num >= img.count - 1) {
-				img.num = 2;
-			} else {
-				img.num +=1;
-			}
-		}
-		if (type === 3) { img.num = 1; }
-		if (type === 4) {
-			if (img.num >= img.count + 1) {
-				img.num = 4;
-			} else {
-				img.num +=1;
-			}
+	if (type === 3) { img.num = 10; }
+	if (type === 4) {
+		if (img.num >= img.count - 6) {
+			img.num = 1;
+		} else {
+			img.num +=1;
 		}
 	}
+}
 
-	context.drawImage(img.dom, img.width*(img.num-1), 0, img.width, img.height, x, y, 30, 40);
+function checkEnemyType(img, type) {
+	if (type === 1) { img.num = 3; }
+	if (type === 2) {
+		if (img.num >= img.count - 1) {
+			img.num = 2;
+		} else {
+			img.num +=1;
+		}
+	}
+	if (type === 3) { img.num = 1; }
+	if (type === 4) {
+		if (img.num >= img.count + 1) {
+			img.num = 4;
+		} else {
+			img.num +=1;
+		}
+	}
 }
 
 function heroMove() {
-	drawImage(hero, PosHeroX, 502, 2, 'hero');
+	drawImage(hero, PosHeroX, PosHeroY, 2, 'hero');
 }
 
 function heroAttack() {
-	drawImage(hero, PosHeroX, 502, 3, 'hero');
+	drawImage(hero, PosHeroX, PosHeroY, 3, 'hero');
 }
 
 function heroBack() {
-	drawImage(hero, PosHeroX, 502, 4, 'hero');
+	drawImage(hero, PosHeroX, PosHeroY, 4, 'hero');
 }
 
 function heroStop() {
-	drawImage(hero, PosHeroX, 502, 1, 'hero');
+	drawImage(hero, PosHeroX, PosHeroY, 1, 'hero');
 }
 
 function heroGoAttack() {
 	if (goAttack) {
 		moveAction = true;
-		if (PosHeroX <= 468) {
-			PosHeroX +=7;
+		if (PosHeroX <= PosEnemyX - 50) {
+			PosHeroX +=10;
 			heroMove();
 			enemyStop();
-		} else if (PosHeroX === 475) {
+		} else if (PosHeroX === PosEnemyX - 40) {
 			heroAttack();
 			enemyStop();
 			goAttack = 0;
 		}
 	} else if (!goAttack) {
-		if (PosHeroX >= 300) {
+		if (PosHeroX >= 200) {
 			heroBack();
-			PosHeroX -= 7;
+			PosHeroX -= 10;
 			
-			if (PosHeroX === 300) {
+			if (PosHeroX === 200) {
 				goAttack = null;
 				trueAnswer = null;
 				mark += 1;
@@ -399,38 +406,38 @@ function heroGoAttack() {
 }
 
 function enemyMove() {
-	drawImage(enemy, PosEnemyX, 520, 2, 'enemy');
+	drawImage(enemy, PosEnemyX, PosEnemyY, 2, 'enemy');
 }
 
 function enemyAttack() {
-	drawImage(enemy, PosEnemyX, 520, 3, 'enemy');
+	drawImage(enemy, PosEnemyX, PosEnemyY, 3, 'enemy');
 }
 
 function enemyBack() {
-	drawImage(enemy, PosEnemyX, 520, 4, 'enemy');
+	drawImage(enemy, PosEnemyX, PosEnemyY, 4, 'enemy');
 }
 
 function enemyStop() {
-	drawImage(enemy, PosEnemyX, 520, 1, 'enemy');
+	drawImage(enemy, PosEnemyX, PosEnemyY, 1, 'enemy');
 }
 
 function enemyGoAttack() {
 	if (goAttack) {
 		moveAction = true;
-		if (PosEnemyX >= 332) {
-			PosEnemyX -=7;
+		if (PosEnemyX >= PosHeroX + 50) {
+			PosEnemyX -= 10;
 			enemyMove();
 			heroStop();
-		} else if (PosEnemyX === 325) {
+		} else if (PosEnemyX === PosHeroX + 40) {
 			enemyAttack();
 			heroStop();
 			goAttack = 0;
 		}
 	} else if (!goAttack) {
-		if (PosEnemyX <= 500) {
+		if (PosEnemyX <= 600) {
 			enemyBack();
-			PosEnemyX += 7;
-			if (PosEnemyX === 500) {
+			PosEnemyX += 10;
+			if (PosEnemyX === 600) {
 				goAttack = null;
 				trueAnswer = null;
 				moveAction = false;
@@ -451,8 +458,8 @@ function save() {
 }
 
 //creating a hero and an enemy
-const hero = loadImage('./img/heroes/1.png', 37, 48, 10);
-const enemy = loadImage('./img/enemies/1.png', 48, 60, 4);
+const hero = loadImage('./img/heroes/1.png', 74, 96, 10);
+const enemy = loadImage('./img/enemies/1.png', 95, 64, 4);
 
 //adding music
 function loadAudio(arr, vol) {

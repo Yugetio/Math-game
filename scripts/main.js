@@ -233,6 +233,9 @@ function drawGame() {
 	function run(){
 		context.drawImage(bgi, 0, 0);
 
+		//lvl
+		writeLvlInfo();
+
 		//question
 		drawBlockQuestion();
     writeTextInBlock();
@@ -308,6 +311,13 @@ function drawMessageText(text, x) {
 	context.fillStyle = '#EC9';
 
 	context.fillText(text , x, 545);
+}
+
+function writeLvlInfo() {
+	context.font = "15px Arial";
+	context.fillStyle = '#66BCB2';
+
+	context.fillText(`lvl ${classIter+1}.${lvlIter+1}` , 380, 20);
 }
 
 //adding answer in answer string
@@ -581,5 +591,5 @@ music.dom.addEventListener('ended', function() {
 }, false);
 
 //Вызов функций (финальный этап)
-drawMenu();
-// startGame(0);
+// drawMenu();
+startGame(0);

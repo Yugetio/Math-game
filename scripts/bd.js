@@ -1,6 +1,6 @@
 const data = [
 	{
-		gold: 10,
+		gold: 6,
 		enemyHp: 6,
 		enemyAtc: 2,
 		task: [
@@ -12,7 +12,7 @@ const data = [
 		]
 	},
 	{
-		gold: 20,
+		gold: 12,
 		enemyHp: 12,
 		enemyAtc: 4,
 		task: [
@@ -24,7 +24,7 @@ const data = [
 		] 
 	},
 	{
-		gold: 30,
+		gold: 24,
 		enemyHp: 24,
 		enemyAtc: 8,
 		task: [
@@ -36,7 +36,7 @@ const data = [
 		] 
 	},
 	{
-		gold: 40,
+		gold: 32,
 		enemyHp: 48,
 		enemyAtc: 12,
 		task: [

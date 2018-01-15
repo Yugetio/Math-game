@@ -43,15 +43,22 @@ Persons.prototype.setAtk = function(num) {
 };
 
 //creating a hero and an enemy
-const hero = new Persons('./img/heroes/1.png', 74, 96, 10, 3, 2);
+const hero = creatHero();
 const enemy = new Persons('./img/enemies/1.png', 95, 64, 4, data[classIter].enemyHp, data[classIter].enemyAtc);
 enemy.gold = data[classIter].gold;
 
+function creatHero() {
+	let hp = localStorage['heroFullHP'] ? JSON.parse(localStorage['heroFullHP']): 3;
+	let atk = localStorage['heroAtk'] ? JSON.parse(localStorage['heroAtk']): 1;
+
+	return new Persons('./img/heroes/1.png', 74, 96, 10, hp, atk);
+}
+
 //event 'click'
 canvas.onclick = function(e) {
-	if (inBlock === 'menu') {
 	const mousePos = getMousePos(e);
 
+	if (inBlock === 'menu') {
 		if(mousePos.x > 250 && mousePos.x < 550){
 			
 			if (mousePos.y > 150 && mousePos.y < 220) { //new game
@@ -66,6 +73,7 @@ canvas.onclick = function(e) {
 	
 			if (mousePos.y > 400 && mousePos.y < 470) { //shop
 				inBlock = 'shop';
+				shop();
 			}
 		}
 
@@ -77,15 +85,25 @@ canvas.onclick = function(e) {
 				}
 		}
 	}
+
+	if (inBlock === 'shop') {
+		console.log(mousePos);
+		if (mousePos.y > 374 && mousePos.y < 405) {
+			if (mousePos.x > 140 && mousePos.x < 271) {
+				upHphero()
+			}
+			if (mousePos.x > 520 && mousePos.x < 650) {
+				upAtkhero()
+			}
+		}
+	}
 };
 
 //event 'keydown'
 body.onkeydown = function(e) {
-	if (e.keyCode === 27 ) {
+	if (e.keyCode === 27 ) { //Esc
 		inBlock = 'menu';
 		drawMenu();
-
-		//for game
 		clearTimeout(setIntervalForGame); 
 		save();
 	}
@@ -660,7 +678,80 @@ function save() {
 	localStorage['gold'] = gold;
 	localStorage['heroHp'] = hero.hp;
 	localStorage['enemyHp'] = enemy.hp;
+}
 
+//shop
+
+function shop() {
+	setIntervalForGame = setInterval(function() {	drawShop(); }, 90);
+}
+
+function drawShop() {
+	let img = new Image();
+	img.onload = function(){ run(); };
+	img.src='./img/shop.png';
+
+	function run(){
+		context.drawImage(img ,0, 0);
+
+    context.font = "24px Arial";
+		context.fillStyle = 'white';
+
+		context.fillText(`Gold - ${gold}`, 340, 110);
+
+		context.font = "30px Arial";
+		context.fillText('HP', 190, 204);
+		context.fillText('ATK', 560, 204);
+
+		context.font = "18px Arial";
+
+		context.fillText(`Current HP - ${hero.fullHP}`, 100, 231);
+		context.fillText(`HP after upgrade - ${hero.fullHP + 1}`, 100, 261);
+		context.fillText(`Cost - ${costHpHpHero()} gold`, 100, 288);
+		context.fillText(`upgrade`, 174, 393);
+
+		context.fillText(`Current ATK - ${hero.atk}`, 480, 231);
+		context.fillText(`ATK after upgrade - ${hero.atk + 1}`, 480, 261);
+		context.fillText(`Cost - ${costAtkHpHero()} gold`, 480, 288);
+		context.fillText(`upgrade`, 554, 393);
+
+		context.font = "30px Arial";
+		context.fillText('Press ESC to enter the menu', 200, 597);
+  }
+}
+
+function costHpHpHero() {
+	if (hero.fullHP + 1 < 11) {
+		return hero.fullHP * 2;
+	} else {
+		return hero.fullHP * 3;
+	}
+}
+
+function costAtkHpHero() {
+	if (hero.atk + 1 < 6) {
+		return hero.atk * 2;
+	} else if (hero.atk + 1 < 12) {
+		return hero.atk * 3;
+	} else {
+		return hero.atk * 5;
+	}
+}
+
+function upHphero() {
+	if (gold >= costHpHpHero()) {
+		gold -= costHpHpHero();
+		hero.fullHP += 1;
+		localStorage['heroFullHP'] = hero.fullHP;
+	}
+}
+
+function upAtkhero() {
+	if (gold >= costAtkHpHero()) {
+		gold -= costAtkHpHero();
+		hero.atk += 1;
+		localStorage['heroAtk'] = hero.atk;
+	}
 }
 
 //adding music

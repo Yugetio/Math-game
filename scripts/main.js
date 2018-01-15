@@ -19,24 +19,33 @@ const PosEnemyY = 419;
 let trueAnswer = null;
 let goAttack = null;
 let moveAction = false; 
+let dieBool = false;
 
-let classIter = 0;
+let classIter = localStorage['classIter'] && localStorage['classIter'] <= data.length ? JSON.parse(localStorage['classIter']) : 0;
 let lvlIter = 0;
 let mark = 0;
 let gold = localStorage['gold'] ? JSON.parse(localStorage['gold']) : 0;
 
-// const heroStats = {
-// 	hp: 3,
-// 	atc: 1,
-// 	upHp(){
-// 		this.hp += 10;
-// 	},
-// 	upAtc(){
-// 		this.atc += 10;
-// 	}
-// };
-// const enemyStats = {};
+function Persons (img, x, y, c, hp, atk) {
+	this.hp = hp;
+	this.fullHP = this.hp;
+	this.atk = atk;
+	this.img = loadImage(img, x, y, c);
+}
 
+Persons.prototype.setHP = function(num) {
+	this.hp = num;
+	this.fullHP  = num;
+};
+
+Persons.prototype.setAtk = function(num) {
+	this.atk = num;
+};
+
+//creating a hero and an enemy
+const hero = new Persons('./img/heroes/1.png', 74, 96, 10, 3, 2);
+const enemy = new Persons('./img/enemies/1.png', 95, 64, 4, data[classIter].enemyHp, data[classIter].enemyAtc);
+enemy.gold = data[classIter].gold;
 
 //event 'click'
 canvas.onclick = function(e) {
@@ -232,6 +241,9 @@ function drawGame() {
 	function run(){
 		context.drawImage(bgi, 0, 0);
 
+		//stuts
+		showStuts();
+
 		//lvl
 		writeLvlInfo();
 
@@ -319,6 +331,26 @@ function writeLvlInfo() {
 	context.fillText(`lvl ${classIter+1}.${lvlIter+1}` , 380, 20);
 }
 
+function showStuts() {
+	//hero
+	context.font = "16px Arial";
+	context.fillStyle = '#00BC06';
+
+	context.fillText(`HP ${hero.hp}` , 10, 20);
+	context.fillText(`ATK ${hero.atk}` , 10, 40);
+	context.fillText(`Gold ${gold}` , 10, 60);
+
+	//enemy
+	context.font = "16px Arial";
+	context.fillStyle = '#BC1F1F';
+	
+	let str = '';
+	str = `${enemy.hp} HP`;
+	context.fillText(str, 800 - (str.length*10), 20);
+	str = `${enemy.atk} ATK`;
+	context.fillText(str, 800 - (str.length*10), 40);
+}
+
 //adding answer in answer string
 function addNumberToAns(num) {
 	if (answer.length > 9) { return; }
@@ -339,19 +371,31 @@ function startGame(bool) { // 1 - continue, 0 - new game
 	setIntervalForGame = setInterval(function() {	drawGame(); }, 90);
 	
 	if (bool) {
-		if (localStorage['classIter'] && localStorage['classIter'] < data.length) { //continue
-			classIter = JSON.parse(localStorage['classIter']);
+		if (classIter < data.length && localStorage['heroHp'] > 0) { //continue
 			lvlIter = JSON.parse(localStorage['lvlIter']);
 			mark = JSON.parse(localStorage['mark']);
+			hero.hp = JSON.parse(localStorage['heroHp']);
+
+			if (localStorage['enemyHp'] > 0) {
+				enemy.hp = JSON.parse(localStorage['enemyHp']);
+			} else {
+				enemy.hp = enemy.fullHP;
+			}
+
+			changeEnemySkin();
 		} else {
 			classIter = 0;
 			lvlIter = 0;
 			mark = 0;
+			hero.hp = hero.fullHP;
+			enemy.hp = enemy.fullHP;
 		}
 	} else { //new game
 		classIter = 0;
 		lvlIter = 0;
 		mark = 0;
+		hero.hp = hero.fullHP;
+		enemy.hp = enemy.fullHP;
 	}
 
 	drawGame();
@@ -382,7 +426,7 @@ function loadImage(path, width, height, count) {
 	type
 	1 - stop
 	2 - move
-	3 - atack
+	3 - attack
 	4 - back
 */
 
@@ -444,19 +488,19 @@ function checkEnemyType(img, type) {
 }
 
 function heroMove() {
-	drawImage(hero, PosHeroX, PosHeroY, 2, 'hero');
+	drawImage(hero.img, PosHeroX, PosHeroY, 2, 'hero');
 }
 
 function heroAttack() {
-	drawImage(hero, PosHeroX, PosHeroY, 3, 'hero');
+	drawImage(hero.img, PosHeroX, PosHeroY, 3, 'hero');
 }
 
 function heroBack() {
-	drawImage(hero, PosHeroX, PosHeroY, 4, 'hero');
+	drawImage(hero.img, PosHeroX, PosHeroY, 4, 'hero');
 }
 
 function heroStop() {
-	drawImage(hero, PosHeroX, PosHeroY, 1, 'hero');
+	drawImage(hero.img, PosHeroX, PosHeroY, 1, 'hero');
 }
 
 function heroGoAttack() {
@@ -470,38 +514,63 @@ function heroGoAttack() {
 			heroAttack();
 			enemyStop();
 			goAttack = 0;
-			addGold();
+			dieBool = true;
 		}
 	} else if (!goAttack) {
 		if (PosHeroX >= 200) {
 			heroBack();
 			PosHeroX -= 10;
-			
+
+			if (dieBool) {
+				enemy.hp -= hero.atk;
+				dieBool = false;
+			} else if (enemy.hp > 0) {
+				enemyStop();
+			}
+
 			if (PosHeroX === 200) {
 				goAttack = null;
 				trueAnswer = null;
 				mark += 1;
 				moveAction = false;
+				enemyDied();
 				nextQuestion();
 			}
 		}
 	}
 }
 
+function enemyDied() {
+	if (enemy.hp > 0) { return; }
+	addGold();
+
+	let hp = data[classIter].enemyHp;
+	let atk = data[classIter].enemyAtc;
+	let gold = data[classIter].gold;
+
+	let sendHp = Math.floor(Math.random() * (hp - (hp / 3))) + (hp / 3);
+	let sendAtk = !classIter ? Math.floor(Math.random() * atk) + (atk/2) : Math.floor(Math.random() * (atk - (atk/2))) + (atk/2);
+
+	changeEnemySkin();
+	enemy.setHP(sendHp);
+	enemy.setAtk(sendAtk);
+	enemy.gold = Math.floor(Math.random() * ((gold + 5) - (gold - 5))) + (gold - 5);
+}
+
 function enemyMove() {
-	drawImage(enemy, PosEnemyX, PosEnemyY, 2, 'enemy');
+	drawImage(enemy.img, PosEnemyX, PosEnemyY, 2, 'enemy');
 }
 
 function enemyAttack() {
-	drawImage(enemy, PosEnemyX, PosEnemyY, 3, 'enemy');
+	drawImage(enemy.img, PosEnemyX, PosEnemyY, 3, 'enemy');
 }
 
 function enemyBack() {
-	drawImage(enemy, PosEnemyX, PosEnemyY, 4, 'enemy');
+	drawImage(enemy.img, PosEnemyX, PosEnemyY, 4, 'enemy');
 }
 
 function enemyStop() {
-	drawImage(enemy, PosEnemyX, PosEnemyY, 1, 'enemy');
+	drawImage(enemy.img, PosEnemyX, PosEnemyY, 1, 'enemy');
 }
 
 function enemyGoAttack() {
@@ -515,18 +584,34 @@ function enemyGoAttack() {
 			enemyAttack();
 			heroStop();
 			goAttack = 0;
+			dieBool = true;
 		}
 	} else if (!goAttack) {
 		if (PosEnemyX <= 600) {
 			enemyBack();
 			PosEnemyX += 10;
+
+			if (dieBool) {
+				hero.hp -= enemy.atk;
+				dieBool = false;
+			} else if (hero.hp > 0) {
+				heroStop();
+			}
+
 			if (PosEnemyX === 600) {
 				goAttack = null;
 				trueAnswer = null;
 				moveAction = false;
+				attackOnHero();
 				nextQuestion();
 			}
 		}
+	}
+}
+
+function attackOnHero() {
+	if (hero.hp <= 0) {
+		heroDied();
 	}
 }
 
@@ -540,12 +625,32 @@ function nextQuestion() {
 	answer = '';
 }
 
-function addGold() {
-	let limitGold = data[classIter].gold;
-	let min = limitGold - 5;
-	let max = limitGold + 5;
+function changeEnemySkin(){
+	enemy.img = loadImage(`./img/enemies/${Math.floor(Math.random() * (5 - 1)) + 1}.png`, 95, 64, 4);
+}
 
-	gold += Math.floor(Math.random() * (max - min)) + min;
+function heroDied() {
+	clearTimeout(setIntervalForGame);
+
+	let img = new Image();
+	img.onload = function(){ run(); };
+	img.src='./img/sky.png';
+
+	function run(){
+		context.drawImage(img ,0, 0);
+
+    context.font = "50px Arial";
+		context.fillStyle = 'white';
+
+		context.fillText('Game over', 280, 305);
+
+		context.font = "30px Arial";
+		context.fillText('Press ESC to enter the menu', 200, 597);
+  }
+}
+
+function addGold() {
+	gold += enemy.gold;
 }
 
 function save() {
@@ -553,11 +658,10 @@ function save() {
 	localStorage['lvlIter'] = lvlIter;
 	localStorage['mark'] = mark;
 	localStorage['gold'] = gold;
-}
+	localStorage['heroHp'] = hero.hp;
+	localStorage['enemyHp'] = enemy.hp;
 
-//creating a hero and an enemy
-const hero = loadImage('./img/heroes/1.png', 74, 96, 10);
-const enemy = loadImage('./img/enemies/1.png', 95, 64, 4);
+}
 
 //adding music
 function loadAudio(arr, vol) {
@@ -598,5 +702,4 @@ music.dom.addEventListener('ended', function() {
 }, false);
 
 //Вызов функций (финальный этап)
-// drawMenu();
-startGame(0);
+drawMenu();

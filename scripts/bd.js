@@ -1,8 +1,8 @@
 const data = [
 	{
-		// gold: 10,
-		// enemyHp: 6,
-		// enemyAtc: 2,
+		gold: 10,
+		enemyHp: 6,
+		enemyAtc: 2,
 		task: [
 			'2 + 2',
 			'5 + 7',
@@ -12,9 +12,9 @@ const data = [
 		]
 	},
 	{
-		// gold: 20,
-		// enemyHp: 12,
-		// enemyAtc: 4,
+		gold: 20,
+		enemyHp: 12,
+		enemyAtc: 4,
 		task: [
 			'18 + 18',
 			'16 + 13 - 7',
@@ -24,9 +24,9 @@ const data = [
 		] 
 	},
 	{
-		// gold: 30,
-		// enemyHp: 24,
-		// enemyAtc: 8,
+		gold: 30,
+		enemyHp: 24,
+		enemyAtc: 8,
 		task: [
 			'33 + 0 + 7',
 			'25 - 15 + 10',
@@ -36,9 +36,9 @@ const data = [
 		] 
 	},
 	{
-		// gold: 40,
-		// enemyHp: 48,
-		// enemyAtc: 12,
+		gold: 40,
+		enemyHp: 48,
+		enemyAtc: 12,
 		task: [
 			'42 * 3',
 			'280 / 2',

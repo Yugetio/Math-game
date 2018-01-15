@@ -23,8 +23,7 @@ let moveAction = false;
 let classIter = 0;
 let lvlIter = 0;
 let mark = 0;
-
-//let gold = 0;
+let gold = localStorage['gold'] ? JSON.parse(localStorage['gold']) : 0;
 
 // const heroStats = {
 // 	hp: 3,
@@ -471,6 +470,7 @@ function heroGoAttack() {
 			heroAttack();
 			enemyStop();
 			goAttack = 0;
+			addGold();
 		}
 	} else if (!goAttack) {
 		if (PosHeroX >= 200) {
@@ -540,12 +540,19 @@ function nextQuestion() {
 	answer = '';
 }
 
+function addGold() {
+	let limitGold = data[classIter].gold;
+	let min = limitGold - 5;
+	let max = limitGold + 5;
+
+	gold += Math.floor(Math.random() * (max - min)) + min;
+}
+
 function save() {
 	localStorage['classIter'] = classIter;
 	localStorage['lvlIter'] = lvlIter;
 	localStorage['mark'] = mark;
-
-	//добавити зберігання галдов
+	localStorage['gold'] = gold;
 }
 
 //creating a hero and an enemy

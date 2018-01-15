@@ -17,10 +17,27 @@ const PosHeroY = 389;
 let PosEnemyX = 600;
 const PosEnemyY = 419;
 let trueAnswer = null;
-let dataIter = 0;
 let goAttack = null;
-let mark = 0;
 let moveAction = false; 
+
+let classIter = 0;
+let lvlIter = 0;
+let mark = 0;
+
+//let gold = 0;
+
+// const heroStats = {
+// 	hp: 3,
+// 	atc: 1,
+// 	upHp(){
+// 		this.hp += 10;
+// 	},
+// 	upAtc(){
+// 		this.atc += 10;
+// 	}
+// };
+// const enemyStats = {};
+
 
 //event 'click'
 canvas.onclick = function(e) {
@@ -193,7 +210,7 @@ function drawAnswerTrue() {
 		context.fillStyle = 'white';
 
 		context.fillText('You answered correctly', 160, 227);
-		context.fillText(`on ${mark} examples of ${data.length}`, 200, 297);
+		context.fillText(`on ${mark} examples of ${data.reduce((sum, item) => sum + item.task.length, 0)}`, 200, 297);
 
 		context.font = "30px Arial";
 		context.fillText('Press ESC to enter the menu', 200, 597);
@@ -202,12 +219,12 @@ function drawAnswerTrue() {
 
 //function of drawing of game objects
 function drawGame() {
-	if (dataIter === data.length) { //if questions ended
+	if (classIter === data.length) { //if questions ended
 		drawAnswerTrue();
 		return;
 	}
 
-	question = data[dataIter];
+	question = data[classIter].task[lvlIter];
 
 	let bgi = new Image();
 	bgi.onload = function(){ run(); };
@@ -295,7 +312,7 @@ function drawMessageText(text, x) {
 
 //adding answer in answer string
 function addNumberToAns(num) {
-	if (answer.length > 9) {return;}
+	if (answer.length > 9) { return; }
 	answer += num;
 }
 
@@ -313,15 +330,18 @@ function startGame(bool) { // 1 - continue, 0 - new game
 	setIntervalForGame = setInterval(function() {	drawGame(); }, 90);
 	
 	if (bool) {
-		if (localStorage['i'] && localStorage['i'] < data.length) { //continue
-			dataIter = localStorage['i'];
-			mark = parseInt(localStorage['mark']);
+		if (localStorage['classIter'] && localStorage['classIter'] < data.length) { //continue
+			classIter = JSON.parse(localStorage['classIter']);
+			lvlIter = JSON.parse(localStorage['lvlIter']);
+			mark = JSON.parse(localStorage['mark']);
 		} else {
-			dataIter = 0;
+			classIter = 0;
+			lvlIter = 0;
 			mark = 0;
 		}
 	} else { //new game
-		dataIter = 0;
+		classIter = 0;
+		lvlIter = 0;
 		mark = 0;
 	}
 
@@ -501,13 +521,21 @@ function enemyGoAttack() {
 }
 
 function nextQuestion() {
-	dataIter++;
+	if (lvlIter === data[classIter].task.length-1) {
+		classIter++;
+		lvlIter = 0;
+	} else {
+		lvlIter++;
+	}
 	answer = '';
 }
 
 function save() {
-	localStorage['i'] = dataIter;
+	localStorage['classIter'] = classIter;
+	localStorage['lvlIter'] = lvlIter;
 	localStorage['mark'] = mark;
+
+	//добавити зберігання галдов
 }
 
 //creating a hero and an enemy
@@ -554,3 +582,4 @@ music.dom.addEventListener('ended', function() {
 
 //Вызов функций (финальный этап)
 drawMenu();
+// startGame(0);

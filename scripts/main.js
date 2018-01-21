@@ -46,6 +46,7 @@ Persons.prototype.setAtk = function(num) {
 const hero = creatHero();
 const enemy = new Persons('./img/enemies/1.png', 95, 64, 4, data[classIter].enemyHp, data[classIter].enemyAtc);
 enemy.gold = data[classIter].gold;
+enemy.imgCount = 1;
 
 function creatHero() {
 	let hp = localStorage['heroFullHP'] ? JSON.parse(localStorage['heroFullHP']): 3;
@@ -87,13 +88,12 @@ canvas.onclick = function(e) {
 	}
 
 	if (inBlock === 'shop') {
-		console.log(mousePos);
 		if (mousePos.y > 374 && mousePos.y < 405) {
 			if (mousePos.x > 140 && mousePos.x < 271) {
-				upHphero()
+				upHphero();
 			}
 			if (mousePos.x > 520 && mousePos.x < 650) {
-				upAtkhero()
+				upAtkhero();
 			}
 		}
 	}
@@ -232,7 +232,7 @@ function drawAnswerTrue() {
 	function run(){
 		context.drawImage(img ,0, 0);
 
-    context.font = "50px Arial";
+   		context.font = "50px Arial";
 		context.fillStyle = 'white';
 
 		context.fillText('You answered correctly', 160, 227);
@@ -267,10 +267,10 @@ function drawGame() {
 
 		//question
 		drawBlockQuestion();
-    writeTextInBlock();
+   		writeTextInBlock();
 
-    //massage
-    drawMessageBlock()
+    	//massage
+    	drawMessageBlock()
 
 		if (trueAnswer === true) { //attack hero
 			heroGoAttack();
@@ -363,7 +363,7 @@ function showStuts() {
 	context.fillStyle = '#BC1F1F';
 	
 	let str = '';
-	str = `${enemy.hp} HP`;
+	str = `${enemy.hp < 0 ? 0 : enemy.hp} HP`;
 	context.fillText(str, 800 - (str.length*10), 20);
 	str = `${enemy.atk} ATK`;
 	context.fillText(str, 800 - (str.length*10), 40);
@@ -389,7 +389,7 @@ function startGame(bool) { // 1 - continue, 0 - new game
 	setIntervalForGame = setInterval(function() {	drawGame(); }, 90);
 	
 	if (bool) {
-		if (classIter < data.length && localStorage['heroHp'] > 0) { //continue
+		if (classIter < data.length && localStorage['heroHp'] && localStorage['heroHp'] > 0) { //continue
 			lvlIter = JSON.parse(localStorage['lvlIter']);
 			mark = JSON.parse(localStorage['mark']);
 			hero.hp = JSON.parse(localStorage['heroHp']);
@@ -400,23 +400,30 @@ function startGame(bool) { // 1 - continue, 0 - new game
 				enemy.hp = enemy.fullHP;
 			}
 
-			changeEnemySkin();
+			enemy.atk = JSON.parse(localStorage['enemyATK']);
+			enemy.imgCount = JSON.parse(localStorage['enemySkin']);
+			enemy.img = loadImage(`./img/enemies/${enemy.imgCount}.png`, 95, 64, 4);
 		} else {
-			classIter = 0;
-			lvlIter = 0;
-			mark = 0;
-			hero.hp = hero.fullHP;
-			enemy.hp = enemy.fullHP;
+			newGame();
 		}
 	} else { //new game
-		classIter = 0;
-		lvlIter = 0;
-		mark = 0;
-		hero.hp = hero.fullHP;
-		enemy.hp = enemy.fullHP;
+		newGame();
 	}
 
 	drawGame();
+}
+
+function newGame() {
+	classIter = 0;
+	lvlIter = 0;
+	mark = 0;
+	hero.hp = hero.fullHP;
+
+	enemy.setHP(data[classIter].enemyHp);
+	enemy.setAtk(data[classIter].enemyAtc);
+	enemy.gold = data[classIter].gold;
+	enemy.img = loadImage('./img/enemies/1.png', 95, 64, 4);
+	enemy.imgCount = 1;
 }
 
 //a function for downloading images that will be displayed as a hero and an enemy
@@ -644,7 +651,8 @@ function nextQuestion() {
 }
 
 function changeEnemySkin(){
-	enemy.img = loadImage(`./img/enemies/${Math.floor(Math.random() * (5 - 1)) + 1}.png`, 95, 64, 4);
+	enemy.imgCount = Math.floor(Math.random() * (5 - 1)) + 1;
+	enemy.img = loadImage(`./img/enemies/${enemy.imgCount}.png`, 95, 64, 4);
 }
 
 function heroDied() {
@@ -678,10 +686,11 @@ function save() {
 	localStorage['gold'] = gold;
 	localStorage['heroHp'] = hero.hp;
 	localStorage['enemyHp'] = enemy.hp;
+	localStorage['enemyATK'] = enemy.atk;
+	localStorage['enemySkin'] = enemy.imgCount;
 }
 
 //shop
-
 function shop() {
 	setIntervalForGame = setInterval(function() {	drawShop(); }, 90);
 }
@@ -785,12 +794,12 @@ function loadAudio(arr, vol) {
 }
 
 const music = loadAudio(['./music/bit.mp3'], 0.3);
-// music.play();
+music.play();
 
 music.dom.addEventListener('ended', function() {
 	this.currentTime = 0;
 	this.play();
 }, false);
 
-//Вызов функций (финальный этап)
+//Calling functions (final stage)
 drawMenu();
